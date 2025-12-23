@@ -7,6 +7,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "diary")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -35,5 +36,7 @@ public class Diary {
     private LocalDate entryDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+
     private User author;
 }

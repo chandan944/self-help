@@ -20,8 +20,6 @@ public class JwtService {
     @Value("${jwt.secret.key}")
     private String secret;
 
-    private static final long EXPIRATION_TIME = 10 * 60 * 60 * 1000;
-
 
     public SecretKey getKey(){
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
@@ -34,6 +32,7 @@ public class JwtService {
     public String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getEmail())
+                .claim("email", user.getEmail())
                 .claim("userId", user.getId())
                 .claim("role", user.getRole().name())
                 .setIssuedAt(new Date())
@@ -53,6 +52,7 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
 
 
 }

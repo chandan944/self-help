@@ -36,21 +36,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = header.substring(7);
-        Claims claims = jwtService.extractClaims(token);
+        try {
+            String token = header.substring(7);
 
-        // 🔥 KEY CHANGE
-        Long userId = claims.get("userId", Long.class);
-        String role = claims.get("role", String.class);
 
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(
-                        userId, // ✅ PRINCIPAL = USER ID
-                        null,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                );
 
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        filterChain.doFilter(request, response);
+            Claims claims = jwtService.extractClaims(token);
+
+            String email = claims.get("email", String.class);
+            String role = claims.get("role", String.class);
+
+            // ⚠️ Add null check
+            if (email == null) {
+                System.out.println("❌ Email is null in JWT claims!");
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            System.out.println("✅ Authenticated user: " + email); // Debug log
+
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(
+                            email,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                    );
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            System.out.println("❌ JWT Error: " + e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Invalid token: " + e.getMessage());
+            return;
+        }
     }
 }

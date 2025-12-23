@@ -2,6 +2,7 @@ package com.selfhelp.diary;
 
 import com.selfhelp.user.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,39 +22,51 @@ public class DiaryController {
     @PostMapping
     public ResponseEntity<Diary> createDiary(
             @RequestBody Diary diary,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal String email
     ) {
-        Diary createdDiary = diaryService.createDiary(diary, user);
+        Diary createdDiary = diaryService.createDiary(diary, email);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDiary);
     }
 
     // 👤 MY DIARIES (ONLY LOGGED-IN USER)
+
+
     @GetMapping("/me")
-    public ResponseEntity<List<Diary>> myDiaries(
-            @AuthenticationPrincipal String email
+    public ResponseEntity<Page<Diary>> myDiaries(
+            @AuthenticationPrincipal String email,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        List<Diary> diaries = diaryService.getMyDiaries(email);
+        Page<Diary> diaries = diaryService.getMyDiaries(email, page, size);
         return ResponseEntity.ok(diaries);
     }
+
+
+
 
 
 
 
     // 🌍 PUBLIC FEED (ANYONE CAN SEE)
     @GetMapping("/public")
-    public ResponseEntity<List<Diary>> publicFeed() {
-        List<Diary> diaries = diaryService.getPublicDiaries();
-        return ResponseEntity.ok(diaries);
+    public ResponseEntity<Page<PublicDiaryDTO>> publicFeed(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(
+                diaryService.getPublicDiaries(page, size)
+        );
     }
+
 
     // ✏️ UPDATE DIARY
     @PutMapping("/{id}")
     public ResponseEntity<Diary> updateDiary(
-            @PathVariable Long id,
-            @RequestBody DiaryUpdateRequest request,
-            @AuthenticationPrincipal User user
+                                               @PathVariable Long id,
+                                               @RequestBody DiaryUpdateRequest request,
+                                               @AuthenticationPrincipal String email
     ) {
-        Diary updatedDiary = diaryService.updateDiary(id, request, user);
+        Diary updatedDiary = diaryService.updateDiary(id, request, email);
         return ResponseEntity.ok(updatedDiary);
     }
 
@@ -61,9 +74,9 @@ public class DiaryController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDiary(
             @PathVariable Long id,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal String email
     ) {
-        diaryService.deleteDiary(id, user);
+        diaryService.deleteDiary(id, email);
         return ResponseEntity.noContent().build();
     }
 }
