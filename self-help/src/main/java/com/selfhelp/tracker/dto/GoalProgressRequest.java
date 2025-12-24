@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class GoalProgressRequest {
     private Long goalId;
-    private LocalDate date;
+    // ❌ REMOVED: private LocalDate date;  (Now auto-generated)
     private Integer todayProgress;
     private Integer totalProgress;
     private String notes;

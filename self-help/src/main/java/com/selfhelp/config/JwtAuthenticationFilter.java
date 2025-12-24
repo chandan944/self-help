@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -45,16 +46,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String email = claims.get("email", String.class);
             String role = claims.get("role", String.class);
-
+            Long userId = claims.get("userId", Long.class);
             // ⚠️ Add null check
-            if (email == null) {
-                System.out.println("❌ Email is null in JWT claims!");
+            if (email == null|| userId == null) {
+                System.out.println("❌ Email is or userId null in JWT claims!");
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            System.out.println("✅ Authenticated user: " + email); // Debug log
+            System.out.println("✅ Authenticated user: " + email + " (ID: " + userId + ")");
 
+            Map<String, Object> principal = Map.of(
+                    "email", email,
+                    "userId", userId,
+                    "role", role
+            );
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(
                             email,
