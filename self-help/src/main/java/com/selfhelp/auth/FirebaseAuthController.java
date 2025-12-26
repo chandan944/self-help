@@ -1,16 +1,13 @@
 package com.selfhelp.auth;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
 import com.selfhelp.common.ApiResponse;
 import com.selfhelp.user.Role;
 import com.selfhelp.user.User;
 import com.selfhelp.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,49 +19,46 @@ public class FirebaseAuthController {
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final RestTemplate restTemplate;
 
     @PostMapping("/firebase")
     public ResponseEntity<?> authenticateWithFirebase(@RequestBody FirebaseAuthRequest request) {
-        System.out.println("📥 Received Firebase auth request");
-        System.out.println("📧 Email: " + request.getEmail());
-        System.out.println("👤 Name: " + request.getName());
-        System.out.println("🎫 Token: " + request.getFirebaseIdToken().substring(0, 20) + "...");
+        System.out.println("📥 Auth request from: " + request.getEmail());
 
         try {
-            // Step 1: Verify Firebase ID token
-            System.out.println("🔐 Verifying Firebase token...");
-            FirebaseToken decodedToken = FirebaseAuth.getInstance()
-                    .verifyIdToken(request.getFirebaseIdToken());
+            // Step 1: Verify Google token
+            String accessToken = request.getFirebaseIdToken();
 
-            String firebaseUid = decodedToken.getUid();
-            String email = decodedToken.getEmail();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            System.out.println("✅ Firebase token verified");
-            System.out.println("🆔 Firebase UID: " + firebaseUid);
-            System.out.println("📧 Verified email: " + email);
+            ResponseEntity<Map> googleResponse = restTemplate.exchange(
+                    "https://www.googleapis.com/oauth2/v2/userinfo",
+                    HttpMethod.GET,
+                    entity,
+                    Map.class
+            );
 
-            // Step 2: Find or create user in database
-            System.out.println("🔍 Looking for user in database...");
+            String email = (String) googleResponse.getBody().get("email");
+            System.out.println("✅ Google token verified: " + email);
+
+            // Step 2: Find or create user
             User user = userRepository.findByEmail(email)
                     .orElseGet(() -> {
-                        System.out.println("👤 Creating new user...");
+                        System.out.println("👤 Creating new user");
                         User newUser = User.builder()
                                 .email(email)
                                 .name(request.getName())
                                 .imageUrl(request.getImageUrl())
                                 .role(Role.USER)
                                 .build();
-                        User savedUser = userRepository.save(newUser);
-                        System.out.println("✅ New user created with ID: " + savedUser.getId());
-                        return savedUser;
+                        return userRepository.save(newUser);
                     });
 
-            System.out.println("✅ User found/created: " + user.getEmail());
-
-            // Step 3: Generate your backend JWT token
-            System.out.println("🎫 Generating backend JWT token...");
+            // Step 3: Generate backend JWT
             String backendJwt = jwtService.generateToken(user);
-            System.out.println("✅ Backend JWT generated: " + backendJwt.substring(0, 20) + "...");
+            System.out.println("✅ JWT generated for: " + user.getEmail());
 
             // Step 4: Return response
             Map<String, Object> response = new HashMap<>();
@@ -77,19 +71,11 @@ public class FirebaseAuthController {
                     "role", user.getRole().name()
             ));
 
-            System.out.println("✅ Sending success response to client");
             return ResponseEntity.ok(response);
 
-        } catch (FirebaseAuthException e) {
-            System.err.println("❌ Firebase token verification failed: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ApiResponse<>(false, "Invalid Firebase token", null));
-
         } catch (Exception e) {
-            System.err.println("❌ Unexpected error: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            System.err.println("❌ Auth error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ApiResponse<>(false, "Authentication failed", null));
         }
     }
