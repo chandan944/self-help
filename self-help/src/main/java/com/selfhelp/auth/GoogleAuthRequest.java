@@ -3,8 +3,8 @@ package com.selfhelp.auth;
 import lombok.Data;
 
 @Data
-public class FirebaseAuthRequest {
-    private String firebaseIdToken;
+public class GoogleAuthRequest {
+    private String firebaseIdToken; // Contains Google access token from Expo
     private String email;
     private String name;
     private String imageUrl;

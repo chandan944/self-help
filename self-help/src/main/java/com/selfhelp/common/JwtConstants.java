@@ -2,6 +2,10 @@ package com.selfhelp.common;
 
 public class JwtConstants {
 
+    public static final String TOKEN_PREFIX = "Bearer ";
+    public static final String HEADER_STRING = "Authorization";
+    public static final String AUTHORITIES_KEY = "roles";
+
     public static final String SECRET_KEY =
             "super-secret-key-change-this-in-production-please";
 
