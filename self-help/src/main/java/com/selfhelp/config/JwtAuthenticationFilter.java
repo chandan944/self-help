@@ -15,7 +15,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -39,34 +38,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String token = header.substring(7);
-
-
-
             Claims claims = jwtService.extractClaims(token);
 
             String email = claims.get("email", String.class);
             String role = claims.get("role", String.class);
             Long userId = claims.get("userId", Long.class);
-            // ⚠️ Add null check
-            if (email == null|| userId == null) {
-                System.out.println("❌ Email is or userId null in JWT claims!");
+
+            if (email == null || userId == null) {
+                System.out.println("❌ Email or userId null in JWT claims!");
                 filterChain.doFilter(request, response);
                 return;
             }
 
             System.out.println("✅ Authenticated user: " + email + " (ID: " + userId + ")");
 
-            Map<String, Object> principal = Map.of(
-                    "email", email,
-                    "userId", userId,
-                    "role", role
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    email,
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
             );
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
-                            email,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                    );
 
             SecurityContextHolder.getContext().setAuthentication(auth);
             filterChain.doFilter(request, response);
@@ -74,8 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             System.out.println("❌ JWT Error: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Invalid token: " + e.getMessage());
-            return;
+            response.getWriter().write("{\"success\": false, \"message\": \"Invalid token: " + e.getMessage() + "\"}");
         }
     }
 }
