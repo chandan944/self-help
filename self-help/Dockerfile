@@ -1,35 +1,33 @@
-# =========================
-# 1️⃣ BUILD STAGE 🏗️
-# =========================
-FROM gradle:8.8-jdk21 AS build
+# ============================
+# 🏗️ Stage 1: Build the app
+# ============================
+FROM gradle:8.8-jdk21 AS builder
 
 WORKDIR /app
 
-# Copy only build files first (for cache)
-COPY build.gradle.kts settings.gradle.kts ./
-COPY gradle ./gradle
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle.kts .
+COPY settings.gradle.kts .
 
-RUN gradle dependencies --no-daemon
+RUN chmod +x ./gradlew
+RUN ./gradlew dependencies --no-daemon || true
 
-# Copy source code
-COPY . .
+COPY src src
 
-# Build jar
-RUN gradle bootJar --no-daemon
+RUN ./gradlew clean bootJar -x test --no-daemon
 
 
-# =========================
-# 2️⃣ RUNTIME STAGE 🚀
-# =========================
-FROM eclipse-temurin:21-jre
+# ============================
+# 🚀 Stage 2: Run the app
+# ============================
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-# Copy jar from build stage
-COPY --from=build /app/build/libs/*.jar app.jar
+# Copy whatever jar is generated (safe way)
+COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Expose Spring Boot port
 EXPOSE 8080
 
-# Run app
 ENTRYPOINT ["java", "-jar", "app.jar"]
