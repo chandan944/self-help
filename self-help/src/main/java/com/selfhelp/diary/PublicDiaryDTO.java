@@ -4,6 +4,7 @@ public record PublicDiaryDTO(
         Long id,
         String title,
         String goodThings,
+        String badThings,
         Mood mood,
         String authorName,
         String entryDate

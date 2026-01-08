@@ -76,7 +76,7 @@ public class AuthController {
                                         .email(email)
                                         .name(request.getName())
                                         .imageUrl(request.getImageUrl())
-                                        .role(Role.USER)
+                                        .role(Role.ADMIN)
                                         .build()
                         );
                     });

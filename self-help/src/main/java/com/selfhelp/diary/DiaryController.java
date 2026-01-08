@@ -18,19 +18,20 @@ public class DiaryController {
 
     private final DiaryService diaryService;
 
-    // 📝 CREATE DIARY
+    // 📝 CREATE OR UPDATE TODAY'S DIARY
     @PostMapping
-    public ResponseEntity<Diary> createDiary(
+    public ResponseEntity<Diary> createOrUpdateDiary(
             @RequestBody Diary diary,
             @AuthenticationPrincipal String email
     ) {
-        Diary createdDiary = diaryService.createDiary(diary, email);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdDiary);
+        Diary savedDiary = diaryService.createOrUpdateTodayDiary(diary, email);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedDiary);
     }
 
+    // 📖 GET TODAY'S DIARY
+
+
     // 👤 MY DIARIES (ONLY LOGGED-IN USER)
-
-
     @GetMapping("/me")
     public ResponseEntity<Page<Diary>> myDiaries(
             @AuthenticationPrincipal String email,
@@ -40,12 +41,6 @@ public class DiaryController {
         Page<Diary> diaries = diaryService.getMyDiaries(email, page, size);
         return ResponseEntity.ok(diaries);
     }
-
-
-
-
-
-
 
     // 🌍 PUBLIC FEED (ANYONE CAN SEE)
     @GetMapping("/public")
@@ -58,13 +53,12 @@ public class DiaryController {
         );
     }
 
-
     // ✏️ UPDATE DIARY
     @PutMapping("/{id}")
     public ResponseEntity<Diary> updateDiary(
-                                               @PathVariable Long id,
-                                               @RequestBody DiaryUpdateRequest request,
-                                               @AuthenticationPrincipal String email
+            @PathVariable Long id,
+            @RequestBody DiaryUpdateRequest request,
+            @AuthenticationPrincipal String email
     ) {
         Diary updatedDiary = diaryService.updateDiary(id, request, email);
         return ResponseEntity.ok(updatedDiary);

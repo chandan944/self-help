@@ -41,7 +41,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
 
     // 🐘 Database
-    runtimeOnly("org.postgresql:postgresql")
+//    runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("org.postgresql:postgresql:42.7.3")
 
     // 🧠 Lombok
     compileOnly("org.projectlombok:lombok")

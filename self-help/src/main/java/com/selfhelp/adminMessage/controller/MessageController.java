@@ -1,15 +1,11 @@
 package com.selfhelp.adminMessage.controller;
 
-
 import com.selfhelp.adminMessage.CreateCommentRequest;
 import com.selfhelp.adminMessage.CreateMessageRequest;
 import com.selfhelp.adminMessage.UpdateMessageRequest;
 import com.selfhelp.adminMessage.dto.CommentDto;
 import com.selfhelp.adminMessage.dto.MessageDto;
-
-import com.selfhelp.adminMessage.message.Message;
 import com.selfhelp.adminMessage.service.MessageService;
-
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +17,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/messages")  // ✅ FIXED: Changed from /api to /api/messages
 public class MessageController {
     private final MessageService messageService;
 
-    // Public endpoints - everyone can view
+    // ============================================
+    // PUBLIC ENDPOINTS - Everyone can view
+    // ============================================
+
     @GetMapping
     public ResponseEntity<Page<MessageDto>> getAllMessages(
             @RequestParam(defaultValue = "0") int page,
@@ -38,7 +37,23 @@ public class MessageController {
         return ResponseEntity.ok(messageService.getMessage(id));
     }
 
-    // Admin only endpoints - create, update, delete messages
+    // ============================================
+    // PUBLIC ENDPOINT - Anyone logged in can comment
+    // ============================================
+
+    @PostMapping("/{messageId}/comments")
+    public ResponseEntity<CommentDto> addComment(
+            @PathVariable Long messageId,
+            @Valid @RequestBody CreateCommentRequest request,
+            @AuthenticationPrincipal String email) {
+        CommentDto comment = messageService.addComment(messageId, request, email);
+        return ResponseEntity.status(HttpStatus.CREATED).body(comment);
+    }
+
+    // ============================================
+    // ADMIN ONLY ENDPOINTS - Create, Update, Delete Messages
+    // ============================================
+
     @PostMapping("/admin")
     public ResponseEntity<MessageDto> createMessage(
             @Valid @RequestBody CreateMessageRequest request,
@@ -64,15 +79,9 @@ public class MessageController {
         return ResponseEntity.noContent().build();
     }
 
-    // Public endpoint - anyone can comment
-    @PostMapping("/{messageId}/comments")
-    public ResponseEntity<CommentDto> addComment(
-            @PathVariable Long messageId,
-            @Valid @RequestBody CreateCommentRequest request,
-            @AuthenticationPrincipal String email) {
-        CommentDto comment = messageService.addComment(messageId, request, email);
-        return ResponseEntity.status(HttpStatus.CREATED).body(comment);
-    }
+    // ============================================
+    // ADMIN ONLY - Delete any user's comment
+    // ============================================
 
     @DeleteMapping("/admin/{messageId}/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
