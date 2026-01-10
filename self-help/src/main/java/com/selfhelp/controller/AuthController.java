@@ -15,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -29,6 +31,12 @@ public class AuthController {
 
     @Value("${google.client.id}")
     private String googleClientId;
+
+    // ✅ Define admin emails here (or move to application.properties)
+    private static final List<String> ADMIN_EMAILS = Arrays.asList(
+            "kanchanparajapati4@gmail.com" // Your admin email
+                          // Add more admin emails here
+    );
 
     @GetMapping("/health")
     public ResponseEntity<?> health() {
@@ -78,6 +86,10 @@ public class AuthController {
 
             System.out.println("✅ Google token verified for: " + email);
 
+            // ✅ Determine role based on email whitelist
+            Role userRole = isAdminEmail(email) ? Role.ADMIN : Role.USER;
+            System.out.println("🔐 Assigned role: " + userRole + " for email: " + email);
+
             // Find or create user
             User user = userRepository.findByEmail(email)
                     .orElseGet(() -> {
@@ -87,10 +99,17 @@ public class AuthController {
                                         .email(email)
                                         .name(request.getName())
                                         .imageUrl(request.getImageUrl())
-                                        .role(Role.USER)
+                                        .role(userRole)  // ✅ Use determined role
                                         .build()
                         );
                     });
+
+            // ✅ Update existing user's role if it changed (optional)
+            if (!user.getRole().equals(userRole)) {
+                System.out.println("🔄 Updating user role from " + user.getRole() + " to " + userRole);
+                user.setRole(userRole);
+                userRepository.save(user);
+            }
 
             // Generate JWT token
             String jwtToken = jwtService.generateToken(user);
@@ -116,5 +135,11 @@ public class AuthController {
                     "message", "Authentication failed: " + e.getMessage()
             ));
         }
+    }
+
+    // ✅ Helper method to check if email is admin
+    private boolean isAdminEmail(String email) {
+        return ADMIN_EMAILS.stream()
+                .anyMatch(adminEmail -> adminEmail.equalsIgnoreCase(email));
     }
 }
