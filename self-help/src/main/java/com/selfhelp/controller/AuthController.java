@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 
@@ -28,6 +29,16 @@ public class AuthController {
 
     @Value("${google.client.id}")
     private String googleClientId;
+
+    @GetMapping("/health")
+    public ResponseEntity<?> health() {
+        return ResponseEntity.ok(Map.of(
+                "status", "UP",
+                "timestamp", LocalDateTime.now().toString(),
+                "service", "Self Help Backend",
+                "version", "1.0.0"
+        ));
+    }
 
     @PostMapping("/google")
     public ResponseEntity<?> authenticateWithGoogle(@RequestBody GoogleAuthRequest request) {
@@ -76,7 +87,7 @@ public class AuthController {
                                         .email(email)
                                         .name(request.getName())
                                         .imageUrl(request.getImageUrl())
-                                        .role(Role.ADMIN)
+                                        .role(Role.USER)
                                         .build()
                         );
                     });
