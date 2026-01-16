@@ -8,7 +8,7 @@ import lombok.Getter;
 @Data
 public class CreateMessageRequest {
     @NotBlank(message = "Content cannot be empty")
-    @Size(max = 1000, message = "Content must be less than 1000 characters")
+    @Size(max = 5000, message = "Content must be less than 5000 characters")
     private String content;
 
     @Getter
