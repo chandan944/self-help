@@ -19,7 +19,9 @@ public class Message {
 
     @Column(nullable = false)
     private String title;
-    @Column(nullable = false, length = 1000)
+
+    @Lob
+    @Column(nullable = false)
     private String content;
 
     @Column(nullable = false)

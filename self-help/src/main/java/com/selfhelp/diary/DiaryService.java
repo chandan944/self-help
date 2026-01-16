@@ -27,10 +27,10 @@ public class DiaryService {
         LocalDate today = LocalDate.now();
 
 
-            // Create new diary
-            diary.setAuthor(user);
-            diary.setEntryDate(today);
-            return diaryRepository.save(diary);
+        // Create new diary
+        diary.setAuthor(user);
+        diary.setEntryDate(today);
+        return diaryRepository.save(diary);
 
     }
 

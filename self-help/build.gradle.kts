@@ -41,9 +41,26 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
 
     // 🐘 Database
-//    runtimeOnly("org.postgresql:postgresql")
+
     runtimeOnly("org.postgresql:postgresql:42.7.3")
 
+    // 🌐 WebSocket Support
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+
+    // 📡 Spring Messaging (required for STOMP)
+    implementation("org.springframework:spring-messaging")
+
+    // 🧩 Spring WebSocket
+    implementation("org.springframework:spring-websocket")
+
+    // 🧦 SockJS fallback support
+    implementation("org.webjars:sockjs-client:1.5.1")
+
+    // 📡 STOMP protocol support
+    implementation("org.webjars:stomp-websocket:2.3.4")
+
+    // 🖼️ Jackson for JSON (likely already included via Spring Boot)
+    implementation("com.fasterxml.jackson.core:jackson-databind")
     // 🧠 Lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
