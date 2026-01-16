@@ -20,8 +20,8 @@ public class Message {
     @Column(nullable = false)
     private String title;
 
-    @Lob
-    @Column(nullable = false)
+
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @Column(nullable = false)
