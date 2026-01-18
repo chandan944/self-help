@@ -10,36 +10,36 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/diaries/{diaryId}/comments")
 @RequiredArgsConstructor
-public class DairyCommentController {
+public class DiaryCommentController {
 
-    private final DairyCommentService dairyCommentService;
+    private final DiaryCommentService diaryCommentService;
 
     // 💬 ADD COMMENT
     @PostMapping
-    public ResponseEntity<DairyCommentDTO> addComment(
+    public ResponseEntity<DiaryCommentDTO> addComment(
             @PathVariable Long diaryId,
             @RequestBody CommentRequest request,
             @AuthenticationPrincipal String email
     ) {
-        DairyCommentDTO comment = dairyCommentService.addComment(diaryId, request.getContent(), email);
+        DiaryCommentDTO comment = diaryCommentService.addComment(diaryId, request.getContent(), email);
         return ResponseEntity.status(HttpStatus.CREATED).body(comment);
     }
 
     // 📖 GET COMMENTS
     @GetMapping
-    public ResponseEntity<Page<DairyCommentDTO>> getComments(
+    public ResponseEntity<Page<DiaryCommentDTO>> getComments(
             @PathVariable Long diaryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        Page<DairyCommentDTO> comments = dairyCommentService.getComments(diaryId, page, size);
+        Page<DiaryCommentDTO> comments = diaryCommentService.getComments(diaryId, page, size);
         return ResponseEntity.ok(comments);
     }
 
     // 🔢 GET COMMENT COUNT
     @GetMapping("/count")
     public ResponseEntity<Long> getCommentCount(@PathVariable Long diaryId) {
-        long count = dairyCommentService.getCommentCount(diaryId);
+        long count = diaryCommentService.getCommentCount(diaryId);
         return ResponseEntity.ok(count);
     }
 
@@ -50,7 +50,7 @@ public class DairyCommentController {
             @PathVariable Long commentId,
             @AuthenticationPrincipal String email
     ) {
-        dairyCommentService.deleteComment(commentId, email);
+        diaryCommentService.deleteComment(commentId, email);
         return ResponseEntity.noContent().build();
     }
 }

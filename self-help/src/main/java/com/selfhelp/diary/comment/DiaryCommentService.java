@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class DairyCommentService {
+public class DiaryCommentService {
 
     private final DiaryCommentRepository commentRepository;
     private final DiaryRepository diaryRepository;
@@ -21,36 +21,36 @@ public class DairyCommentService {
 
     // 💬 ADD COMMENT
     @Transactional
-    public DairyCommentDTO addComment(Long diaryId, String content, String email) {
+    public DiaryCommentDTO addComment(Long diaryId, String content, String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(() -> new RuntimeException("Diary not found"));
 
-        DairyComment dairyComment = DairyComment.builder()
+        DiaryComment diaryComment = DiaryComment.builder()
                 .content(content)
                 .diary(diary)
                 .author(user)
                 .build();
 
-        DairyComment savedDairyComment = commentRepository.save(dairyComment);
+        DiaryComment savedDiaryComment = commentRepository.save(diaryComment);
 
-        return DairyCommentDTO.builder()
-                .id(savedDairyComment.getId())
-                .content(savedDairyComment.getContent())
-                .authorName(savedDairyComment.getAuthor().getName())
-                .authorId(savedDairyComment.getAuthor().getId())
-                .createdAt(savedDairyComment.getCreatedAt())
+        return DiaryCommentDTO.builder()
+                .id(savedDiaryComment.getId())
+                .content(savedDiaryComment.getContent())
+                .authorName(savedDiaryComment.getAuthor().getName())
+                .authorId(savedDiaryComment.getAuthor().getId())
+                .createdAt(savedDiaryComment.getCreatedAt())
                 .build();
     }
 
     // 📖 GET COMMENTS FOR DIARY
-    public Page<DairyCommentDTO> getComments(Long diaryId, int page, int size) {
+    public Page<DiaryCommentDTO> getComments(Long diaryId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         return commentRepository.findByDiaryId(diaryId, pageable)
-                .map(dairyComment -> DairyCommentDTO.builder()
+                .map(dairyComment -> DiaryCommentDTO.builder()
                         .id(dairyComment.getId())
                         .content(dairyComment.getContent())
                         .authorName(dairyComment.getAuthor().getName())
@@ -67,13 +67,13 @@ public class DairyCommentService {
     // 🗑️ DELETE COMMENT
     @Transactional
     public void deleteComment(Long commentId, String email) {
-        DairyComment dairyComment = commentRepository.findById(commentId)
+        DiaryComment diaryComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
 
-        if (!dairyComment.getAuthor().getEmail().equals(email)) {
+        if (!diaryComment.getAuthor().getEmail().equals(email)) {
             throw new RuntimeException("Not authorized to delete this comment");
         }
 
-        commentRepository.delete(dairyComment);
+        commentRepository.delete(diaryComment);
     }
 }
