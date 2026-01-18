@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CommentService {
 
-    private final CommentRepository commentRepository;
+    private final DiaryCommentRepository commentRepository;
     private final DiaryRepository diaryRepository;
     private final UserRepository userRepository;
 

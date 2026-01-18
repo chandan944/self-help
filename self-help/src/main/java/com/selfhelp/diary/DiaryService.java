@@ -1,6 +1,6 @@
 package com.selfhelp.diary;
 
-import com.selfhelp.diary.comment.CommentRepository;
+import com.selfhelp.diary.comment.DiaryCommentRepository;
 import com.selfhelp.user.User;
 import com.selfhelp.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +18,7 @@ public class DiaryService {
 
     private final DiaryRepository diaryRepository;
     private final UserRepository userRepository;
-    private final CommentRepository commentRepository; // Add this dependency
+    private final DiaryCommentRepository commentRepository; // Add this dependency
 
     // 📝 CREATE OR UPDATE TODAY'S DIARY
     public Diary createOrUpdateTodayDiary(Diary diary, String email) {
