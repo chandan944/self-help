@@ -10,36 +10,36 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/diaries/{diaryId}/comments")
 @RequiredArgsConstructor
-public class CommentController {
+public class DairyCommentController {
 
-    private final CommentService commentService;
+    private final DairyCommentService dairyCommentService;
 
     // 💬 ADD COMMENT
     @PostMapping
-    public ResponseEntity<CommentDTO> addComment(
+    public ResponseEntity<DairyCommentDTO> addComment(
             @PathVariable Long diaryId,
             @RequestBody CommentRequest request,
             @AuthenticationPrincipal String email
     ) {
-        CommentDTO comment = commentService.addComment(diaryId, request.getContent(), email);
+        DairyCommentDTO comment = dairyCommentService.addComment(diaryId, request.getContent(), email);
         return ResponseEntity.status(HttpStatus.CREATED).body(comment);
     }
 
     // 📖 GET COMMENTS
     @GetMapping
-    public ResponseEntity<Page<CommentDTO>> getComments(
+    public ResponseEntity<Page<DairyCommentDTO>> getComments(
             @PathVariable Long diaryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        Page<CommentDTO> comments = commentService.getComments(diaryId, page, size);
+        Page<DairyCommentDTO> comments = dairyCommentService.getComments(diaryId, page, size);
         return ResponseEntity.ok(comments);
     }
 
     // 🔢 GET COMMENT COUNT
     @GetMapping("/count")
     public ResponseEntity<Long> getCommentCount(@PathVariable Long diaryId) {
-        long count = commentService.getCommentCount(diaryId);
+        long count = dairyCommentService.getCommentCount(diaryId);
         return ResponseEntity.ok(count);
     }
 
@@ -50,7 +50,7 @@ public class CommentController {
             @PathVariable Long commentId,
             @AuthenticationPrincipal String email
     ) {
-        commentService.deleteComment(commentId, email);
+        dairyCommentService.deleteComment(commentId, email);
         return ResponseEntity.noContent().build();
     }
 }

@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DiaryCommentRepository extends JpaRepository<Comment, Long> {
+public interface DiaryCommentRepository extends JpaRepository<DairyComment, Long> {
 
     @Query("SELECT c FROM Comment c WHERE c.diary.id = :diaryId ORDER BY c.createdAt DESC")
-    Page<Comment> findByDiaryId(Long diaryId, Pageable pageable);
+    Page<DairyComment> findByDiaryId(Long diaryId, Pageable pageable);
 
     long countByDiaryId(Long diaryId);
 }
