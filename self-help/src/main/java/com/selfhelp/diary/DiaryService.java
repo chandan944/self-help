@@ -1,5 +1,6 @@
 package com.selfhelp.diary;
 
+import com.selfhelp.diary.comment.CommentRepository;
 import com.selfhelp.user.User;
 import com.selfhelp.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class DiaryService {
 
     private final DiaryRepository diaryRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository; // Add this dependency
 
     // 📝 CREATE OR UPDATE TODAY'S DIARY
     public Diary createOrUpdateTodayDiary(Diary diary, String email) {
@@ -54,6 +56,9 @@ public class DiaryService {
     }
 
     // 🌍 PUBLIC FEED
+// Add to DiaryService
+
+    // Update getPublicDiaries method
     public Page<PublicDiaryDTO> getPublicDiaries(int page, int size) {
         Pageable pageable = PageRequest.of(
                 page,
@@ -62,15 +67,20 @@ public class DiaryService {
         );
 
         return diaryRepository.findPublicDiaries(pageable)
-                .map(diary -> new PublicDiaryDTO(
-                        diary.getId(),
-                        diary.getTitle(),
-                        diary.getGoodThings(),
-                        diary.getBadThings(),
-                        diary.getMood(),
-                        diary.getAuthor().getName(),
-                        diary.getEntryDate().toString()
-                ));
+                .map(diary -> {
+                    long commentCount = commentRepository.countByDiaryId(diary.getId());
+                    PublicDiaryDTO dto = new PublicDiaryDTO(
+                            diary.getId(),
+                            diary.getTitle(),
+                            diary.getGoodThings(),
+                            diary.getBadThings(),
+                            diary.getMood(),
+                            diary.getAuthor().getName(),
+                            diary.getEntryDate().toString()
+                    );
+                    dto.setCommentCount(commentCount);
+                    return dto;
+                });
     }
 
     // ✏️ UPDATE (AUTHOR ONLY)
@@ -102,4 +112,5 @@ public class DiaryService {
 
         diaryRepository.delete(diary);
     }
+
 }
