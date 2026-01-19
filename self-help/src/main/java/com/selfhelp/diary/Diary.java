@@ -8,6 +8,12 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+
+
+
+
+
 @Entity
 @Table(name = "diary")
 @Getter
@@ -41,8 +47,6 @@ public class Diary {
     @JoinColumn(name = "user_id")
     private User author;
 
-    // Add @Builder.Default to make the initialization work with @Builder
     @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
     private List<DiaryComment> comments = new ArrayList<>();
 }
