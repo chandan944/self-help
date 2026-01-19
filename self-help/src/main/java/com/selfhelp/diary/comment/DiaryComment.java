@@ -5,6 +5,8 @@ import com.selfhelp.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +28,7 @@ public class DiaryComment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "diary_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)  // Add this line
     private Diary diary;
 
     @ManyToOne(fetch = FetchType.LAZY)
